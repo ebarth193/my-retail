@@ -1,4 +1,3 @@
-from typing import Optional
 from external_dependencies.mongo import Mongo
 from external_dependencies.redsky import Redsky
 from models.product import (
@@ -53,7 +52,7 @@ class Products:
         )
 
     @staticmethod
-    def combine_product_info(product_details: Optional[Item], product_price: PriceInfo, product_id: str) -> ProductInfo:
+    def combine_product_info(product_details: Item, product_price: PriceInfo, product_id: str) -> ProductInfo:
         full_item_details: Item = Item(
             product_description=product_details.product_description,
             enrichment=product_details.enrichment,
