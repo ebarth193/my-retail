@@ -10,5 +10,5 @@ To run the sever locally:
 * Run the server: `python app.py`
 * Test the up endpoint at `/up`
 
-To run the unite tests:
+To run the unit tests:
 * From the root project directory run: `python -m unittest`

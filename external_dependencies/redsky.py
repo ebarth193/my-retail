@@ -1,20 +1,21 @@
 import requests
 import json
 import logging
+import properties
 from requests import Response
-from properties import get_property
 from exceptions.exceptions import ApiException
 
 
 class Redsky:
-    base_url: str = get_property('local', 'REDSKY_URL')
 
     @staticmethod
     def get_product(product_id: str):
         logging.info(f'Attempting to retrieve info for product id {product_id}')
         status_code = None
         try:
-            response: Response = requests.get(f"{Redsky.base_url}&tcin={product_id}")
+            response: Response = requests.get(
+                f"{properties.get_property('local', 'REDSKY_URL')}&tcin={product_id}"
+            )
             status_code = response.status_code
             response.raise_for_status()
             response_dict = json.loads(response.text)

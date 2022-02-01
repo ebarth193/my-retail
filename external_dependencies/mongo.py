@@ -1,5 +1,6 @@
 import urllib
 import logging
+import properties
 from urllib import parse
 from pymongo import MongoClient
 from pymongo.errors import (
@@ -7,22 +8,24 @@ from pymongo.errors import (
     OperationFailure,
     PyMongoError
 )
-from properties import get_property
 from exceptions.exceptions import ApiException
 
 
 class Mongo:
 
     @staticmethod
-    def get_db_client():
+    def create_mongo_client(conn_str: str):
+        return MongoClient(conn_str, serverSelectionTimeoutMS=3000)
+
+    def get_db_client(self):
         logging.info('Attempting to create MongoClient')
-        username = urllib.parse.quote_plus(get_property('local', 'MONGO_DB_USER'))
-        password = urllib.parse.quote_plus(get_property('local', 'MONGO_DB_PASS'))
-        cluster_url = get_property('local', 'MONGO_URL')
+        username = urllib.parse.quote_plus(properties.get_property('local', 'MONGO_DB_USER'))
+        password = urllib.parse.quote_plus(properties.get_property('local', 'MONGO_DB_PASS'))
+        cluster_url = properties.get_property('local', 'MONGO_URL')
         conn_str = f"mongodb+srv://{username}:{password}{cluster_url}"
         try:
-            client = MongoClient(conn_str, serverSelectionTimeoutMS=3000)
-            database = client[get_property('local', 'MONGO_DB_NAME')]
+            client = self.create_mongo_client(conn_str)
+            database = client[properties.get_property('local', 'MONGO_DB_NAME')]
             return database
         except ConnectionFailure as e:
             logging.error('ConnectionFailure: Unable to create MongoDB client!', exc_info=True)
@@ -31,11 +34,12 @@ class Mongo:
             logging.error('PyMongoError: Unable to create MongoDB client!', exc_info=True)
             raise ApiException("Internal Server Error!", status_code=500) from e
 
+
     @staticmethod
     def get_product_price(db_client, product_id: str):
         try:
             logging.info(f"Attempting to retrieve product price for {product_id}")
-            price_table = db_client[get_property('local', 'MONGO_DB_PRICE_TABLE')]
+            price_table = db_client[properties.get_property('local', 'MONGO_DB_PRICE_TABLE')]
             result = price_table.find_one({'product_id': product_id})
             if result:
                 logging.info(f"Successfully retrieved product price for {product_id}")
