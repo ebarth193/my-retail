@@ -89,3 +89,17 @@ class ExceptionsTestCase(unittest.TestCase):
         result = self.products.combine_product_info(self.mock_item, self.mock_missing_price_info, self.mock_product_id)
         self.assertEqual(result.tcin, self.mock_product_id)
         self.assertEqual(result.item, self.mock_item)
+
+    @patch.object(Mongo, 'update_product_price')
+    def test_update_product_price_calls_update_product_price(self, mock_update_product_price):
+        product_info_dict = self.mock_product.to_dict()
+        self.products.update_product_price(product_info_dict, self.mock_product_id)
+        price_info = product_info_dict.get('product', {}).get('item', {}).get('current_price')
+        mock_update_product_price.assert_called_with(self.mock_product_id, price_info)
+
+    @patch.object(Mongo, 'update_product_price')
+    def test_update_product_price_returns_result_from_update_product_price(self, mock_update_product_price):
+        product_info_dict = self.mock_product.to_dict()
+        mock_update_product_price.return_value = 1
+        result = self.products.update_product_price(product_info_dict, self.mock_product_id)
+        self.assertEqual(result, mock_update_product_price.return_value)

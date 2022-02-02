@@ -12,8 +12,8 @@ iniconfig==1.1.1
 itsdangerous==2.0.1
 Jinja2==3.0.3
 MarkupSafe==2.0.1
-marshmallow==3.14.1
 marshmallow-enum==1.5.1
+mypy==0.931
 mypy-extensions==0.4.3
 packaging==21.3
 pluggy==1.0.0
@@ -22,6 +22,7 @@ pymongo==4.0.1
 pyparsing==3.0.7
 requests==2.27.1
 toml==0.10.2
+tomli==2.0.0
 typing-inspect==0.7.1
 typing_extensions==4.0.1
 urllib3==1.26.8

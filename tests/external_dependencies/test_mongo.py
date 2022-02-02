@@ -5,6 +5,7 @@ from unittest.mock import patch, call
 from external_dependencies.mongo import Mongo
 from exceptions.exceptions import ApiException
 from bson.objectid import ObjectId
+from dataclasses import dataclass
 
 
 class MockResponse:
@@ -16,12 +17,18 @@ class MockResponse:
         pass
 
 
+@dataclass
+class MockUpdateResult:
+    modified_count: int
+
+
 class TestMongo(unittest.TestCase):
     def setUp(self):
         self.mock_product_id = '123PRODUCTID'
         self.mgo = Mongo()
         self.mock_response = '{"data": {"product": {"item": "some product data", "tcin": "123PRODUCTID"}}}'
         self.mock_product_info = json.loads(self.mock_response).get('data', {}).get('product', {}).get('item', {})
+        self.mock_price_info = {"value": "10.99", "currency_code": "USD"}
 
     @patch.object(Mongo, 'create_mongo_client')
     @patch.object(properties, 'get_property')
@@ -88,3 +95,24 @@ class TestMongo(unittest.TestCase):
         mock_find_one.side_effect = ApiException(message='TEST EXCEPTION')
         with self.assertRaises(ApiException):
             self.mgo.get_product_price(self.mock_product_id)
+
+    @patch.object(Mongo, 'update_one')
+    @patch.object(properties, 'get_property')
+    def test_update_product_price_returns_1_if_result(self, mock_get_property, mock_update_one):
+        mock_update_one.return_value = MockUpdateResult(modified_count=1)
+        result = self.mgo.update_product_price(self.mock_product_id, self.mock_price_info)
+        self.assertEqual(result, 1)
+
+    @patch.object(Mongo, 'update_one')
+    @patch.object(properties, 'get_property')
+    def test_update_product_price_returns_None_if_no_result(self, mock_get_property, mock_update_one):
+        mock_update_one.return_value = None
+        result = self.mgo.update_product_price(self.mock_product_id, self.mock_price_info)
+        self.assertEqual(result, None)
+
+    @patch.object(Mongo, 'update_one')
+    @patch.object(properties, 'get_property')
+    def test_get_update_product_price_raises_ApiException(self, mock_get_property, mock_update_one):
+        mock_update_one.side_effect = ApiException(message='TEST EXCEPTION')
+        with self.assertRaises(ApiException):
+            self.mgo.update_product_price(self.mock_product_id, self.mock_price_info)
