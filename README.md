@@ -12,3 +12,14 @@ To run the sever locally:
 
 To run the unit tests:
 * From the root project directory run: `python -m unittest`
+
+# Available Endpoints
+
+* **URL**
+
+  /products/<product_id>/
+
+* **Supported methods:**
+  
+  `GET` | `PUT` 
+ 
