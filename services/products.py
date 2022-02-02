@@ -43,9 +43,7 @@ class Products:
 
     @staticmethod
     def get_product_price(product_id: str) -> PriceInfo:
-        mongo = Mongo()
-        client = mongo.get_db_client()
-        price_info = mongo.get_product_price(client, product_id)
+        price_info = Mongo().get_product_price(product_id)
         return PriceInfo(
             value=price_info.get('value') if price_info else None,
             currency_code=price_info.get('currency_code') if price_info else None
