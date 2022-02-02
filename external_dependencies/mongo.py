@@ -12,6 +12,8 @@ from exceptions.exceptions import ApiException
 
 
 class Mongo:
+    def __init__(self):
+        self.client = self.get_db_client()
 
     @staticmethod
     def create_mongo_client(conn_str: str):
@@ -34,13 +36,15 @@ class Mongo:
             logging.error('PyMongoError: Unable to create MongoDB client!', exc_info=True)
             raise ApiException("Internal Server Error!", status_code=500) from e
 
+    def find_one(self, table: str, to_find: dict):
+        table = self.client[table]
+        return table.find_one(to_find)
 
-    @staticmethod
-    def get_product_price(db_client, product_id: str):
+    def get_product_price(self, product_id: str):
         try:
             logging.info(f"Attempting to retrieve product price for {product_id}")
-            price_table = db_client[properties.get_property('local', 'MONGO_DB_PRICE_TABLE')]
-            result = price_table.find_one({'product_id': product_id})
+            product_info = {'product_id': product_id}
+            result = self.find_one(properties.get_property('local', 'MONGO_DB_PRICE_TABLE'), product_info)
             if result:
                 logging.info(f"Successfully retrieved product price for {product_id}")
                 # Convert the ObjectId to a string
