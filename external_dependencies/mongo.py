@@ -40,6 +40,10 @@ class Mongo:
         table = self.client[table]
         return table.find_one(to_find)
 
+    def update_one(self, table: str, product_info: dict, updated_content: dict):
+        table = self.client[table]
+        return table.update_one(product_info, {'$set': updated_content})
+
     def get_product_price(self, product_id: str):
         try:
             logging.info(f"Attempting to retrieve product price for {product_id}")
@@ -61,4 +65,29 @@ class Mongo:
         except PyMongoError as e:
             logging.error(f'PyMongoError: Unable to retrieve product price for product id {product_id}', exc_info=True)
             raise ApiException(f'Internal Server Error: Unable to retrieve product price for product id {product_id}',
+                               status_code=500)
+
+    def update_product_price(self, product_id: str, price_info: dict):
+        try:
+            logging.info(f"Attempting to update product price for {product_id}")
+            product_info = {'product_id': product_id}
+            result = self.update_one(
+                properties.get_property('local', 'MONGO_DB_PRICE_TABLE'),
+                product_info,
+                price_info
+            )
+            if result and result.modified_count == 1:
+                logging.info(f"Successfully updated product price for {product_id}")
+                return result.modified_count
+            else:
+                logging.info(f"Unable to update product price for {product_id}")
+                return None
+        except OperationFailure as e:
+            logging.error(f'OperationFailure: Unable to update product price for product id {product_id}',
+                          exc_info=True)
+            raise ApiException(f'Internal Server Error: Unable to update product price for product id {product_id}',
+                               status_code=500)
+        except PyMongoError as e:
+            logging.error(f'PyMongoError: Unable to update product price for product id {product_id}', exc_info=True)
+            raise ApiException(f'Internal Server Error: Unable to update product price for product id {product_id}',
                                status_code=500)

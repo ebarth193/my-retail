@@ -63,3 +63,9 @@ class Products:
             item=full_item_details
         )
         return full_product_info
+
+    @staticmethod
+    def update_product_price(product_info, product_id: str):
+        price_info = product_info.get('product', {}).get('item', {}).get('current_price')
+        result = Mongo().update_product_price(product_id, price_info)
+        return result

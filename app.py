@@ -1,7 +1,9 @@
 import logging
+import json
 from flask import Flask
 from flask import jsonify
-from flask import Response as Response
+from flask import request
+from flask import Response
 from services.products import Products
 from exceptions.exceptions import ApiException, ModeledApiException, Message
 
@@ -29,11 +31,17 @@ def up():
     return jsonify({"status": "happy"})
 
 
-@app.route('/products/<string:product_id>/', methods=['GET'])
+@app.route('/products/<string:product_id>/', methods=['GET', 'PUT'])
 def get_product_info(product_id: str):
-    ps = Products()
-    result = ps.get_product_info(product_id)
-    return Response(result.to_json(), status=200, mimetype='application/json')
+    if request.method == 'GET':
+        result = Products().get_product_info(product_id)
+        return Response(result.to_json(), status=200, mimetype='application/json')
+    else:
+        result = Products().update_product_price(json.loads(request.data), product_id)
+        if result == 1:
+            return Response(status=204, mimetype='application/json')
+        else:
+            raise ApiException(message=f'Unable to update price for product with product id {product_id}')
 
 
 if __name__ == '__main__':
