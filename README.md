@@ -21,5 +21,5 @@ To run the unit tests:
 
 * **Supported methods:**
   
-  `GET` | `PUT` 
+  `GET` | `PUT` | test3
  
